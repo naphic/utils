@@ -53,25 +53,11 @@ do
             ;;            
         3)
             clear
-            echo "Initializing stress test. Please wait a few minutes..."
+            echo "Initializing stress test. Please wait..."
             echo "................................................................................"
-            system_profiler 2>/dev/null > /tmp/.yes
-            cores=$(grep "Number of Cores" /tmp/.yes |cut -d":" -f2)
-            cpu_name=$(grep Processor\ Name /tmp/.yes | cut -d":" -f2)
-            echo "$cpu_name has$cores cores; starting$cores yes processes."
-            for i in $(seq 1 $cores); do yes > /dev/null & done
+            for i in $(seq $(getconf _NPROCESSORS_ONLN)); do yes > /dev/null & disown; done
             echo "................................................................................"
-            sleep 7
-            idle=$(top -l 1 | grep CPU\ usage | awk '{print $7}' | sed 's/%//')
-            idle_rounded=$(echo $idle | cut -d"." -f1)
-            if [ $idle_rounded -gt 15 ]
-            then
-                echo "$cpu_name appears to support hyper-threading;"
-                echo " starting$cores more yes processes."
-                echo "................................................................................"
-                for i in $(seq 1 $cores); do yes > /dev/null & done
-            fi
-                
+            echo "................................................................................"
             echo "Stress test started."
             open -a /Applications/Utilities/Activity\ Monitor.app
             open /Library/Application\ Support/Apple/Grapher/Examples/3D\ Examples/*
